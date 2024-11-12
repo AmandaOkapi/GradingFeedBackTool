@@ -247,7 +247,7 @@ def GenerateFeedback(stdscr):
         stdscr.getch()
         return False
     
-    if(confirmationMenu(stdscr, "Copied to clipboard and save. Grade Another Student? ", len(template.splitlines()))):
+    if(confirmationMenu(stdscr, "Copied to clipboard and saved. Grade Another Student? ", len(template.splitlines()))):
         return True
     return False
 
