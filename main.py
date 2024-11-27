@@ -3,16 +3,26 @@ import pyperclip
 
 #Customizeable attributes
 #headers
-name = "Your Name"
-email = "youremail@email.com"
-officeHours = "Your office hours"
+#name = "Your Name"
+#email = "youremail@email.com"
+#officeHours = "Your office hours"
+#footnotes
+#wellDone = "Well done" #if applied
+
+name = "Jane Doe"
+email = "jane@email.com"
+officeHours = "Fridays 12-1pm"
 #footnotes
 wellDone = "Well done" #if applied
 
 #technicals
-maxGrade = 60;
+maxGrade = 60
 wellDoneAmount = int( (maxGrade *0.9))
 OVERALL =0; #beware, global variable
+
+
+
+
 ##Sections
 class Section:
     # Constructor to initialize attributes
@@ -31,14 +41,46 @@ class Deduction:
         self.amount = amount  
         self.reason = reason
 
+#//DEFAULT
+#///
+#s0 = Section("Submission", 0, False)
+#s1 = Section("Part I", 20)
+#s2 = Section("Part II", 40)
+#other
+#sOther = Section("----", 0, False)
+#sectionsList = [s0,s1,s2, sOther]
 
 s0 = Section("Submission", 0, False)
 s1 = Section("Part I", 20)
 s2 = Section("Part II", 40)
+#other
+sOther = Section("----", 0, False)
+sectionsList = [s0,s1,s2, sOther]
 
-sectionsList = [s0,s1,s2]
 
+#Feed back template Customizable
+def Template():
+    wellDoneBenchmark =0.9
+    sectionsText = ""
 
+    for section in sectionsList:
+        sectionsText += f"{section.name} {sectionScoreString(section)}\n"  # Add section name and score
+        for d in section.deductionsToStudent:
+            if(d.amount ==0):
+                sectionsText += f"\tNote: {d.reason}\n"  # Add deductions
+            else:
+                sectionsText += f"\t({d.amount}) {d.reason}\n"  # Add deductions
+
+    # Construct the full template
+    template = f"""
+Grading TA: {name}
+Email: {email}
+OH: {officeHours}
+Grading Details: ({calculateOverall()}/{maxGrade})
+{sectionsText}
+{wellDone if calculateOverall() > maxGrade * wellDoneBenchmark else ""}
+    """
+    return template
 
 def calculateOverall():
     score = maxGrade
@@ -55,24 +97,6 @@ def sectionScoreString(section):
         score += d.amount
     return f"({score}/{section.weight})"
 
-def Template():
-    sectionsText = ""
-
-    for section in sectionsList:
-        sectionsText += f"{section.name} {sectionScoreString(section)}\n"  # Add section name and score
-        for d in section.deductionsToStudent:
-            sectionsText += f"\t({d.amount}) {d.reason}\n"  # Add deductions
-
-    # Construct the full template
-    template = f"""
-Grading TA: {name}
-Email: {email}
-OH: {officeHours}
-Grading Details: ({calculateOverall()}/{maxGrade})
-{sectionsText}
-{wellDone if calculateOverall() > maxGrade * 0.9 else ""}
-    """
-    return template
 
 def confirmationMenu(stdscr, text : str, lineNum :int):
     #initial confirmation menu
@@ -133,9 +157,9 @@ def main(stdscr):
             #otherwise handle the selection accordingly
             handleMainMenu(mainMenu[selected_idx], stdscr)
             #else:
-             #   stdscr.addstr(len(menu) + 1, 0, f"You selected '{menu[selected_idx]}'")
-           # stdscr.refresh()
-           # stdscr.getch()  # Wait for another key press before returning to the menu
+            #   stdscr.addstr(len(menu) + 1, 0, f"You selected '{menu[selected_idx]}'")
+            # stdscr.refresh()
+            # stdscr.getch()  # Wait for another key press before returning to the menu
 
         stdscr.refresh()
 
@@ -151,10 +175,11 @@ def handleMainMenu(x, stdscr):
             stdscr.getch()
             return
         case "Load Deductions":
+            #read the deductions saved in decductions.txt
             stdscr.clear()
             stdscr.addstr(0,0,"Loaded")
             #loading deductions
-            sectionIndex =0;
+            sectionIndex =0
             with open("deductions.txt", "r") as file:
                 while True:
                     line = file.readline()
@@ -179,7 +204,7 @@ def gradeMenu(stdscr):
 
     # Define main menu items
     gradeMenuList = []
-    sectionCnt=1;
+    sectionCnt=1
     for item in sectionsList:
         gradeMenuList.append(f"Section {sectionCnt}: {item.name}")
         sectionCnt+=1
@@ -193,42 +218,44 @@ def gradeMenu(stdscr):
     #Start the grade menu Displaying 
     while True:
         stdscr.clear()
-        
-        # Display grade menu
-        stdscr.addstr(0, 0, f"Current Grade {calculateOverall()}/{maxGrade}")
-        for i, item in enumerate(gradeMenuList):
-            if i == selected_idx:
-                stdscr.addstr(i+1, 0, item, curses.A_REVERSE)  # Highlight selected item
-            else:
-                stdscr.addstr(i+1, 0, item)
-        
-        # Get user input
-        key = stdscr.getch()
-        
-        if key == curses.KEY_UP and selected_idx > 0:
-            selected_idx -= 1
-        elif key == curses.KEY_DOWN and selected_idx < len(gradeMenuList) - 1:
-            selected_idx += 1
-        elif key == ord("\n"):  # Enter key
-            #exit the loop and end the program if exit selected
-            if(gradeMenuList[selected_idx] == "Cancel"):
-                if(confirmationMenu(stdscr, "Are you sure you would like to quit? ", len(gradeMenuList)+1)):
-                    break
+        try:
+            # Display grade menu
+            stdscr.addstr(0, 0, f"Current Grade {calculateOverall()}/{maxGrade}")
+            for i, item in enumerate(gradeMenuList):
+                if i == selected_idx:
+                    stdscr.addstr(i+1, 0, item, curses.A_REVERSE)  # Highlight selected item
                 else:
+                    stdscr.addstr(i+1, 0, item)
+            
+            # Get user input
+            key = stdscr.getch()
+            
+            if key == curses.KEY_UP and selected_idx > 0:
+                selected_idx -= 1
+            elif key == curses.KEY_DOWN and selected_idx < len(gradeMenuList) - 1:
+                selected_idx += 1
+            elif key == ord("\n"):  # Enter key
+                #exit the loop and end the program if exit selected
+                if(gradeMenuList[selected_idx] == "Cancel"):
+                    if(confirmationMenu(stdscr, "Are you sure you would like to quit? ", len(gradeMenuList)+1)):
+                        break
+                    else:
+                        continue
+                if(gradeMenuList[selected_idx] == "View applied deductions"):
+                    AppliedDeductionMenu(stdscr)
                     continue
-            if(gradeMenuList[selected_idx] == "View applied deductions"):
-                AppliedDeductionMenu(stdscr)
-                continue
-            if(gradeMenuList[selected_idx] == "Finish"):
-                if(GenerateFeedback(stdscr)):
-                    gradeMenu(stdscr)
-                    break
-                continue
-            #otherwise handle the selection accordingly
-            DeductionMenu(stdscr, selected_idx)
-    
+                if(gradeMenuList[selected_idx] == "Finish"):
+                    if(GenerateFeedback(stdscr)):
+                        gradeMenu(stdscr)
+                        break
+                    continue
+                #otherwise handle the selection accordingly
+                DeductionMenu(stdscr, selected_idx)
+        
 
-        stdscr.refresh()
+            stdscr.refresh()
+        except curses.error:
+            screenSizeErrorHandle(stdscr)
 
 def GenerateFeedback(stdscr):
     stdscr.clear()
@@ -263,10 +290,6 @@ def AppliedDeductionMenu(stdscr):
     stdscr.getch()
 
 def DeductionMenu(stdscr, index):
-
-    #display the deduction bank 
-
-
     #track user scrolling
     selected_idx = 0
 
@@ -284,7 +307,7 @@ def DeductionMenu(stdscr, index):
         deductionMenu.append("Back")
 
         # Display grade menu
-        stdscr.addstr(0, 0, f"Section: {sectionsList[index].name}. Press <- to go back quickly!")
+        stdscr.addstr(0, 0, f"Section: {sectionsList[index].name}. (Current Grade {calculateOverall()}/{maxGrade}) Press <- to go back quickly!")
         for i, item in enumerate(deductionMenu):
             if i == selected_idx:
                 stdscr.addstr(i+1, 0, item, curses.A_REVERSE)  # Highlight selected item
@@ -307,11 +330,7 @@ def DeductionMenu(stdscr, index):
                 stdscr.refresh()
                 break
             if(deductionMenu[selected_idx] == "[Remove deduction from section]"):
-                stdscr.clear()
-                stdscr.addstr(0,0,"Coming soon")
-                stdscr.refresh()
-                stdscr.getch()
-                #not yet implemented
+                removeDeduction(stdscr, index)
                 break
             if(deductionMenu[selected_idx] == "Back"):
                 break
@@ -332,6 +351,8 @@ def DeductionMenu(stdscr, index):
             
         stdscr.refresh()
 
+#Add a dection to a section and apply it to the student
+#in: stdscr, index of the section to add to
 def AddDeductionMenu(stdscr, index):
     #loop to ensure valid inputs
     while True:
@@ -362,16 +383,77 @@ def AddDeductionMenu(stdscr, index):
             d = Deduction(number, user_input)
             sectionsList[index].deductionsBank.append(d)
             sectionsList[index].deductionsToStudent.append(d)
-            with open("deductions.txt", "w") as file:
-                pass #clear the file
-            with open("deductions.txt", "a") as file:
-                for s in sectionsList:
-                    for d in s.deductionsBank:
-                        file.write(str(d.amount) + '\n')
-                        file.write(d.reason+ '\n')
-                    file.write("BREAK"+ '\n')
+            saveToDeductionsFile()
         return
+    
+#Reset the deductions.txt file to hold the most updated deductions
+def saveToDeductionsFile():
+    with open("deductions.txt", "w") as file:
+        pass #clear the file
+    with open("deductions.txt", "a") as file:
+        for s in sectionsList:
+            for d in s.deductionsBank:
+                file.write(str(d.amount) + '\n')
+                file.write(d.reason+ '\n')
+            file.write("BREAK"+ '\n')    
 
+#remove a dection from a section and from the student if it is applied
+#in: stdscr, index of the section to remove from
+def removeDeduction(stdscr, index):
+    #track user scrolling
+    selected_idx = 0
 
+    #Start the grade menu Displaying 
+    while True:
+        stdscr.clear()
+        
+        # Define main menu items
+        deductionMenu = []
+        deductionsToDisplay = sectionsList[index].deductionsBank
+        for item in deductionsToDisplay:
+            deductionMenu.append(f"({item.amount})  {item.reason}")
+        deductionMenu.append("Back")
+
+        # Display dections menu
+        stdscr.addstr(0, 0, f"Select Deduction to remove")
+        for i, item in enumerate(deductionMenu):
+            if i == selected_idx:
+                stdscr.addstr(i+1, 0, item, curses.A_REVERSE)  # Highlight selected item
+            else:
+                stdscr.addstr(i+1, 0, item)
+
+        #input handling
+        # Get user input
+        key = stdscr.getch()
+        
+        if key == curses.KEY_UP and selected_idx > 0:
+            selected_idx -= 1
+        elif key == curses.KEY_DOWN and selected_idx < len(deductionMenu) - 1:
+            selected_idx += 1
+        elif key == curses.KEY_LEFT:
+            break
+        elif key == ord("\n"):  # Enter key
+            #get confirmation
+            if(confirmationMenu(stdscr,"Remove deduction from student and section bank: ", len(deductionMenu) + 4)):
+                #handle selection
+                #remove from student if there
+                if(sectionsList[index].deductionsBank[selected_idx] in sectionsList[index].deductionsToStudent):
+                    sectionsList[index].deductionsToStudent.remove(sectionsList[index].deductionsBank[selected_idx])
+                #print info
+                stdscr.addstr(len(deductionMenu) + 1, 0, f"Deduction: '{sectionsList[index].deductionsBank[selected_idx].reason}' removed")            
+                stdscr.addstr(len(deductionMenu) + 2, 0, f"Press any key to continue")
+
+                #remove from internal bank
+                sectionsList[index].deductionsBank.pop(selected_idx)    
+                #reset file
+                saveToDeductionsFile()
+                stdscr.refresh()
+                stdscr.getch()  # Wait for another key press before returning to the menu
+            return #go back
+
+#stop curses from crashing on screen resizing
+def screenSizeErrorHandle(stdscr):
+    stdscr.refresh()
+    stdscr.getch()
 
 curses.wrapper(main)
