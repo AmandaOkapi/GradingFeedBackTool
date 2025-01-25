@@ -1,0 +1,31 @@
+#//DEFAULT
+#///
+#s0 = Section("Submission", 0, False)
+#s1 = Section("Part I", 20)
+#s2 = Section("Part II", 40)
+#other
+#sOther = Section("----", 0, False)
+#sectionsList = [s0,s1,s2, sOther]
+#Section (NAME, WEIGHT) or (NAME, WEIGHT, WEIGHT_VISABLE)
+
+
+#Assignment
+s0 = Section("Submission", 0, False)
+s1 = Section("Part I", 20)
+s2 = Section("Part II", 40)
+
+#other
+sOther = Section("----", 0, False)
+sectionsList = [s0,s1,s2, sOther]
+
+
+
+#tutorial
+s0 = Section("Submission", 0, False)
+s1 = Section("Practice1", 0, False)
+s2 = Section("Practice2", 0, False)
+s3 = Section("Practice3", 0, False)
+
+#other
+sOther = Section("----", 0, False)
+sectionsList = [s0,s1,s2,s3, sOther]

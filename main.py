@@ -15,10 +15,6 @@ officeHours = "Fridays 12-1pm"
 #footnotes
 wellDone = "Well done" #if applied
 
-#technicals
-maxGrade = 60
-wellDoneAmount = int( (maxGrade *0.9))
-OVERALL =0; #beware, global variable
 
 
 
@@ -49,14 +45,24 @@ class Deduction:
 #other
 #sOther = Section("----", 0, False)
 #sectionsList = [s0,s1,s2, sOther]
-
+#Section (NAME, WEIGHT) or (NAME, WEIGHT, WEIGHT_VISABLE)
 s0 = Section("Submission", 0, False)
 s1 = Section("Part I", 20)
 s2 = Section("Part II", 40)
+
+
+
 #other
 sOther = Section("----", 0, False)
 sectionsList = [s0,s1,s2, sOther]
 
+
+#technicals
+maxGrade = 0
+for s in sectionsList:
+    maxGrade+= s.weight
+wellDoneAmount = int( (maxGrade *0.9))
+OVERALL =0; #beware, global variable
 
 #Feed back template Customizable
 def Template():
@@ -64,6 +70,9 @@ def Template():
     sectionsText = ""
 
     for section in sectionsList:
+        #do not show unweighted sections if no deductions were made in them
+        if(section.weight ==0 and len(section.deductionsToStudent) == 0):
+            continue
         sectionsText += f"{section.name} {sectionScoreString(section)}\n"  # Add section name and score
         for d in section.deductionsToStudent:
             if(d.amount ==0):
@@ -394,7 +403,9 @@ def saveToDeductionsFile():
         for s in sectionsList:
             for d in s.deductionsBank:
                 file.write(str(d.amount) + '\n')
-                file.write(d.reason+ '\n')
+                file.write(d.reason)
+                if(d != len(sectionsList )-1):
+                    file.write('\n')
             file.write("BREAK"+ '\n')    
 
 #remove a dection from a section and from the student if it is applied
